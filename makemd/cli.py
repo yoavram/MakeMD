@@ -1,5 +1,7 @@
 import re
 
+from . import __version__
+
 from bibtexparser import load as load_bib
 from bibtexparser.bwriter import BibTexWriter
 from bibtexparser.bibdatabase import BibDatabase
@@ -9,7 +11,9 @@ species_pattern = re.compile(
 	r'({\\textless}i{\\textgreater}\w.*?{\\textless}/i{\\textgreater})'
 )
 
+
 @click.group()
+@click.version_option(version=__version__)
 def cli():
 	pass
 
