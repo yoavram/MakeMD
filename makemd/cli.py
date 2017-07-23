@@ -7,6 +7,8 @@ from bibtexparser.bwriter import BibTexWriter
 from bibtexparser.bibdatabase import BibDatabase
 import click
 
+print = lambda s: click.secho(s, fg='red')
+
 species_pattern = re.compile(
 	r'({\\textless}i{\\textgreater}\w.*?{\\textless}/i{\\textgreater})'
 )
@@ -20,7 +22,6 @@ def cli():
 @cli.command()
 @click.argument('markdown_input', type=click.File('rt'))
 @click.argument('keys_output', type=click.File('wt'))
-	#type=click.Path(file_okay=True, dir_okay=False, writable=True))
 def list(markdown_input, keys_output):
 	pattern = re.compile('@([-\w]+\d{4}[a-z]?)')
 	groups = (pattern.findall(line) for line in markdown_input)
