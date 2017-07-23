@@ -3,13 +3,20 @@ import re
 from bibtexparser import load as load_bib
 from bibtexparser.bwriter import BibTexWriter
 from bibtexparser.bibdatabase import BibDatabase
-
+import click
 
 species_pattern = re.compile(
 	r'({\\textless}i{\\textgreater}\w.*?{\\textless}/i{\\textgreater})'
 )
 
-def citation_keys(markdown_filename, keys_filename):
+@click.group()
+def cli():
+	pass
+
+@cli.command()
+@click.argument('markdown_filename', type=click.Path(exists=True, file_okay=True, dir_okay=False, readable=True))
+@click.argument('keys_filename', type=click.Path(file_okay=True, dir_okay=False, writable=True))
+def list(markdown_filename, keys_filename):
 	pattern = re.compile('@([-\w]+\d{4}[a-z]?)')
 	with open(markdown_filename) as f:
 		groups = (pattern.findall(line) for line in f)
@@ -20,7 +27,12 @@ def citation_keys(markdown_filename, keys_filename):
 			print(g, file=f)
 
 
-def bibtex(keys_filename, bibtex_filename, output_filename, verbose):
+@cli.command()
+@click.argument('keys_filename', type=click.Path(exists=True, file_okay=True, dir_okay=False, readable=True))
+@click.argument('bibtex_filename', type=click.Path(exists=True, file_okay=True, dir_okay=False, readable=True))
+@click.argument('output_filename', type=click.Path(file_okay=True, dir_okay=False, writable=True))
+@click.option('-v/-V', '--verbose/--no-verbose', default=False)
+def extract(keys_filename, bibtex_filename, output_filename, verbose):
 	with open(keys_filename) as f:
 		citation_keys = (line.strip() for line in f.readlines())
 	if verbose:
@@ -51,3 +63,7 @@ def bibtex(keys_filename, bibtex_filename, output_filename, verbose):
 	writer = BibTexWriter()
 	with open(output_filename, 'w') as f:
 	    f.write(writer.write(out_bib))
+
+
+if __name__ == '__main__':
+	cli()
