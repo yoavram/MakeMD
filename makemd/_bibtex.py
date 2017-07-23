@@ -9,6 +9,17 @@ species_pattern = re.compile(
 	r'({\\textless}i{\\textgreater}\w.*?{\\textless}/i{\\textgreater})'
 )
 
+def citation_keys(markdown_filename, keys_filename):
+	pattern = re.compile('@([-\w]+\d{4}[a-z]?)')
+	with open(markdown_filename) as f:
+		groups = (pattern.findall(line) for line in f)
+		groups = sum((g for g in groups if g), [])	
+	groups = set(groups)
+	with open(keys_filename, 'wt') as f:
+		for g in groups:
+			print(g, file=f)
+
+
 def bibtex(keys_filename, bibtex_filename, output_filename, verbose):
 	with open(keys_filename) as f:
 		citation_keys = (line.strip() for line in f.readlines())
