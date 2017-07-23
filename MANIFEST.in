@@ -1,0 +1,3 @@
+include README.md
+include requirements.txtinclude versioneer.py
+include makemd/_version.py
