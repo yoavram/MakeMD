@@ -18,34 +18,31 @@ def cli():
 	pass
 
 @cli.command()
-@click.argument('markdown_filename', type=click.Path(exists=True, file_okay=True, dir_okay=False, readable=True))
-@click.argument('keys_filename', type=click.Path(file_okay=True, dir_okay=False, writable=True))
-def list(markdown_filename, keys_filename):
+@click.argument('markdown_input', type=click.File('rt'))
+@click.argument('keys_output', type=click.File('wt'))
+	#type=click.Path(file_okay=True, dir_okay=False, writable=True))
+def list(markdown_input, keys_output):
 	pattern = re.compile('@([-\w]+\d{4}[a-z]?)')
-	with open(markdown_filename) as f:
-		groups = (pattern.findall(line) for line in f)
-		groups = sum((g for g in groups if g), [])	
+	groups = (pattern.findall(line) for line in markdown_input)
+	groups = sum((g for g in groups if g), [])	
 	groups = set(groups)
-	with open(keys_filename, 'wt') as f:
-		for g in groups:
-			print(g, file=f)
+	for g in groups:
+		print(g, file=keys_output)
 
 
 @cli.command()
-@click.argument('keys_filename', type=click.Path(exists=True, file_okay=True, dir_okay=False, readable=True))
-@click.argument('bibtex_filename', type=click.Path(exists=True, file_okay=True, dir_okay=False, readable=True))
-@click.argument('output_filename', type=click.Path(file_okay=True, dir_okay=False, writable=True))
+@click.argument('keys_input', type=click.File('rt'))
+@click.argument('bibtex_input', type=click.File('r'))
+@click.argument('bibtex_output', type=click.File('wt'))
 @click.option('-v/-V', '--verbose/--no-verbose', default=False)
-def extract(keys_filename, bibtex_filename, output_filename, verbose):
-	with open(keys_filename) as f:
-		citation_keys = (line.strip() for line in f.readlines())
+def extract(keys_input, bibtex_input, bibtex_output, verbose):
+	lines = keys_input.readlines()
+	citation_keys = (line.strip() for line in lines)
 	if verbose:
-		print("Read {} keys from {}".format(len(citation_keys), citation_keys))
-
-	with open(bibtex_filename) as f:
-		main_bib = load_bib(f)
+		print("Read {} keys from {}".format(len(lines), keys_input.name))
+	main_bib = load_bib(bibtex_input)
 	if verbose:
-		print("Read {} entries from {}".format(len(main_bib.entries), bibtex_filename))
+		print("Read {} entries from {}".format(len(main_bib.entries), bibtex_input.name))
 
 	out_bib = BibDatabase()
 	for key in citation_keys:
@@ -63,10 +60,9 @@ def extract(keys_filename, bibtex_filename, output_filename, verbose):
 		e['title'] = title		
 		out_bib.entries.append(e)
 	if verbose:
-		print("Writing {} entries to {}".format(len(out_bib.entries), output_filename))
+		print("Writing {} entries to {}".format(len(out_bib.entries), bibtex_output.name))
 	writer = BibTexWriter()
-	with open(output_filename, 'w') as f:
-	    f.write(writer.write(out_bib))
+	bibtex_output.write(writer.write(out_bib))
 
 
 if __name__ == '__main__':
