@@ -39,5 +39,11 @@ setup(
     author='Yoav Ram',
     install_requires=install_requires,
     dependency_links=dependency_links,
-    author_email='yoav@yoavram.com'
+    author_email='yoav@yoavram.com',
+    entry_points={
+        'console_scripts': [
+            # add cli scripts here in this form:
+            'makemd=makemd.cli:cli',
+        ],
+    },
 )
