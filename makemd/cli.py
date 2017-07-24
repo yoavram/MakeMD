@@ -8,11 +8,11 @@ from bibtexparser.bibdatabase import BibDatabase
 import click
 
 _print = print
-def print(msg, file=None):
-	if file is None:
-		click.secho(s, fg='red')
+def print(msg, **kwargs):
+	if 'file' in kwargs:
+		_print(msg, **kwargs)
 	else:
-		_print(msg, file=file)
+		click.secho(s, fg='red')
 
 
 @click.group()
@@ -32,6 +32,7 @@ def list(markdown_input, keys_output, verbose):
 	if verbose:		
 		print("Writing {} keys from {} to {}".format(len(groups), 
 			click.format_filename(markdown_input.name), click.format_filename(keys_output)))		
+	print('', file=keys_output, end='') # touch file
 	for g in groups:
 		print(g, file=keys_output)
 
